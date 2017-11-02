@@ -1,0 +1,9 @@
+h1b = load '/user/hive/warehouse/h1b.db/h1b_final' using PigStorage('\t') as(s_no:int, case_status:chararray, employer_name:chararray, soc_name:chararray, job_title:chararray, full_time_position:chararray, prevailing_wage:int, year:chararray, worksite:chararray, longitute:double, latitute:double);
+
+bag2 = foreach h1b generate year,job_title,prevailing_wage,full_time_position; 
+bag3= filter bag2 by full_time_position=='Y'; 
+bag4= group bag3 by (year,job_title); 
+bag5= foreach bag4 generate group,COUNT(bag3),SUM(bag3.prevailing_wage); 
+bag6 = foreach bag5 generate FLATTEN($0),(double)$2/$1 as avg1; 
+bag7= order bag6 by avg1 desc; 
+dump bag7;
